@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { Post, User, Vote, Comment } = require('../../models');
 
 const sequelize = require('../../config/connection');
+const { response } = require('express');
 
 //get all posts
 router.get('/', (req, res) => {
@@ -84,13 +85,17 @@ router.post('/', (req, res) => {
 
 //update a post by vote
 router.put('/upvote', (req, res) => {
+  //make sure the session exits first
+  if(req.session) {
+  //pass session id along with all descructured properties on req.body
   //custom static method created in models/Post.js
-  Post.upvote(req.body, { Vote })
-  .then(updatedPostData => res.json(updatedPostData))
+  Post.upvote({ ...req.body, user_id: req.session.user_id }, { Vote, Comment, User })
+  .then(updatedVoteData => res.json(updatedVoteData))
   .catch(err => {
     console.log(err);
     res.status(400).json(err);
     });
+  }
 });
 
 
