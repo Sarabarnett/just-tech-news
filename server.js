@@ -2,6 +2,27 @@ const express = require('express');
 const routes = require('./controllers/');
 const sequelize = require('./config/connection');
 
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+
+//express session requirements
+const session = require('express-session');
+
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+
+const sess = {
+  secret: 'Super secret secret',
+  cookie: {},
+  resave: false, 
+  saveUninitialized: true,
+  store: new SequelizeStore({
+    db: sequelize
+  })
+};
+
+
 //handlebars stuff
 const exphbs = require('express-handlebars');
 const hbs = exphbs.create({});
@@ -9,8 +30,6 @@ const hbs = exphbs.create({});
 //css stylesheet stuff
 const path = require('path');
 
-const app = express();
-const PORT = process.env.PORT || 3001;
 
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
@@ -22,6 +41,8 @@ app.use(express.urlencoded({ extended: false }));
 //css stylesheet path
 app.use(express.static(path.join(__dirname, 'public')));
 
+//express session call
+app.use(session(sess));
 
 
 //turn on routes
